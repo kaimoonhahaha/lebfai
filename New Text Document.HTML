@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lumen Console with Gemini AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#080B10;
+    --panel:#0F151C;
+    --panel-2:#141C25;
+    --line:#212B36;
+    --line-soft:#1A222C;
+    --text:#E7ECF1;
+    --text-dim:#7C8898;
+    --text-faint:#4C5764;
+    --web:#57E8C4;
+    --web-dim:#1E4B41;
+    --pot:#F5A94D;
+    --pot-dim:#4D3A1E;
+    --off:#3A4552;
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+
+  html,body{
+    height:100%;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter', sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  body{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px 16px;
+    background:
+      radial-gradient(circle at 18% 12%, rgba(87,232,196,0.07), transparent 42%),
+      radial-gradient(circle at 85% 88%, rgba(245,169,77,0.06), transparent 45%),
+      var(--bg);
+    position:relative;
+    overflow-x:hidden;
+  }
+
+  body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+    background-size:34px 34px;
+    pointer-events:none;
+  }
+
+  .console{
+    position:relative;
+    width:100%;
+    max-width:1100px;
+    background:linear-gradient(180deg, var(--panel), #0B1015);
+    border:1px solid var(--line);
+    border-radius:20px;
+    padding:26px;
+    box-shadow:0 40px 90px -30px rgba(0,0,0,0.8);
+    display:grid;
+    grid-template-columns: 1fr 380px;
+    gap:28px;
+  }
+
+  @media (max-width:900px){
+    .console{grid-template-columns:1fr;}
+  }
+
+  .console::before{
+    content:"";
+    position:absolute;
+    top:0; left:24px; right:24px; height:1px;
+    background:linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+  }
+
+  .left-pane{
+    display:flex;
+    flex-direction:column;
+    gap:22px;
+  }
+
+  .right-pane{
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    border-radius:16px;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+  }
+
+  /* ---- header ---- */
+  .head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding-bottom:16px;
+    border-bottom:1px solid var(--line-soft);
+  }
+
+  .brand{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+  }
+
+  .brand-name{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:18px;
+    font-weight:600;
+    letter-spacing:0.2px;
+  }
+
+  .brand-sub{
+    font-size:12px;
+    color:var(--text-dim);
+  }
+
+  .conn{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:12px;
+    color:var(--text-dim);
+  }
+
+  .conn-dot{
+    width:7px; height:7px;
+    border-radius:50%;
+    background:var(--off);
+    box-shadow:0 0 0 3px rgba(255,255,255,0.03);
+    transition:background .3s, box-shadow .3s;
+  }
+
+  .conn-dot.online{
+    background:var(--web);
+    box-shadow:0 0 10px 1px rgba(87,232,196,0.6);
+  }
+
+  .conn-dot.offline{
+    background:#E06666;
+    box-shadow:0 0 10px 1px rgba(224,102,102,0.5);
+  }
+
+  /* ---- api key bar ---- */
+  .api-bar{
+    display:flex;
+    gap:8px;
+    background:var(--panel-2);
+    padding:10px 14px;
+    border-radius:12px;
+    border:1px solid var(--line-soft);
+    align-items:center;
+  }
+
+  .api-bar input{
+    flex:1;
+    background:transparent;
+    border:none;
+    color:var(--text);
+    font-size:13px;
+    outline:none;
+  }
+
+  .api-bar input::placeholder{
+    color:var(--text-faint);
+  }
+
+  .api-btn{
+    background:rgba(87,232,196,0.12);
+    border:1px solid rgba(87,232,196,0.3);
+    color:var(--web);
+    padding:6px 12px;
+    border-radius:8px;
+    font-size:12px;
+    font-weight:600;
+    cursor:pointer;
+    transition:.2s;
+  }
+
+  .api-btn:hover{
+    background:rgba(87,232,196,0.25);
+  }
+
+  /* ---- main grid section ---- */
+  .grid{
+    display:grid;
+    grid-template-columns:190px 1fr;
+    gap:20px;
+    align-items:center;
+  }
+
+  @media (max-width:540px){
+    .grid{grid-template-columns:1fr; justify-items:center;}
+  }
+
+  /* ---- level display ---- */
+  .display{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:14px;
+  }
+
+  .dial{
+    position:relative;
+    width:150px;
+    height:150px;
+    border-radius:50%;
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .dial::before{
+    content:"";
+    position:absolute;
+    inset:8px;
+    border-radius:50%;
+    border:1px solid var(--line-soft);
+  }
+
+  .dial-ring{
+    position:absolute;
+    inset:0;
+    border-radius:50%;
+    padding:3px;
+    background:conic-gradient(var(--ring-color, var(--off)) calc(var(--pct, 0) * 1%), transparent 0);
+    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor;
+    mask-composite:exclude;
+    transition:background .5s ease;
+  }
+
+  .level-num{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:48px;
+    font-weight:700;
+    line-height:1;
+    color:var(--text);
+  }
+
+  .level-word{
+    font-size:11px;
+    color:var(--text-faint);
+    margin-top:2px;
+    letter-spacing:0.3px;
+  }
+
+  .bars{
+    display:flex;
+    gap:5px;
+    align-items:flex-end;
+    height:22px;
+  }
+
+  .bar{
+    width:8px;
+    border-radius:2px;
+    background:var(--line);
+    transition:background .3s, box-shadow .3s;
+  }
+  .bar:nth-child(1){height:30%;}
+  .bar:nth-child(2){height:48%;}
+  .bar:nth-child(3){height:64%;}
+  .bar:nth-child(4){height:82%;}
+  .bar:nth-child(5){height:100%;}
+
+  .bar.lit{
+    background:var(--bar-color, var(--web));
+    box-shadow:0 0 8px 0 var(--bar-color, var(--web));
+  }
+
+  .driven-by{
+    font-size:12px;
+    color:var(--text-dim);
+    text-align:center;
+  }
+
+  .driven-by b{
+    color:var(--text);
+    font-weight:600;
+  }
+
+  /* ---- right column controls ---- */
+  .col-controls{
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+    width:100%;
+  }
+
+  .section-label{
+    font-size:12px;
+    color:var(--text-dim);
+    margin-bottom:8px;
+  }
+
+  .levels{
+    display:grid;
+    grid-template-columns:repeat(6, 1fr);
+    gap:6px;
+  }
+
+  .lvl-btn{
+    position:relative;
+    padding:10px 0;
+    border-radius:8px;
+    border:1px solid var(--line);
+    background:var(--panel-2);
+    color:var(--text);
+    font-family:'Space Grotesk', sans-serif;
+    font-size:14px;
+    font-weight:600;
+    cursor:pointer;
+    transition:all .18s ease;
+  }
+
+  .lvl-btn:hover{
+    border-color:rgba(255,255,255,0.25);
+    transform:translateY(-1px);
+  }
+
+  .lvl-btn.selected{
+    border-color:var(--web);
+    color:var(--web);
+    background:rgba(87,232,196,0.1);
+    box-shadow:0 0 0 1px rgba(87,232,196,0.25) inset;
+  }
+
+  .hint{
+    font-size:11.5px;
+    color:var(--text-faint);
+    line-height:1.4;
+  }
+
+  .hint b{color:var(--pot); font-weight:600;}
+
+  .telemetry{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+  }
+
+  .tele-item{
+    background:var(--panel-2);
+    border:1px solid var(--line-soft);
+    border-radius:10px;
+    padding:10px 12px;
+  }
+
+  .tele-label{
+    font-size:11px;
+    color:var(--text-faint);
+    margin-bottom:2px;
+  }
+
+  .tele-val{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:16px;
+    font-weight:600;
+  }
+
+  /* ---- AI Chat Pane ---- */
+  .chat-header{
+    padding:14px 16px;
+    background:rgba(255,255,255,0.02);
+    border-bottom:1px solid var(--line-soft);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+
+  .chat-title{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:14px;
+    font-weight:600;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+
+  .chat-title span{
+    width:8px; height:8px; background:var(--web); border-radius:50%; box-shadow:0 0 8px var(--web);
+  }
+
+  .chat-body{
+    flex:1;
+    padding:14px;
+    overflow-y:auto;
+    max-height:340px;
+    min-height:220px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    scroll-behavior: smooth;
+  }
+
+  .message{
+    max-width:85%;
+    padding:10px 12px;
+    border-radius:12px;
+    font-size:13px;
+    line-height:1.45;
+    word-break:break-word;
+  }
+
+  .message.ai{
+    background:rgba(255,255,255,0.04);
+    border:1px solid var(--line-soft);
+    align-self:flex-start;
+    color:var(--text);
+    border-bottom-left-radius:3px;
+  }
+
+  .message.user{
+    background:rgba(87,232,196,0.15);
+    border:1px solid rgba(87,232,196,0.3);
+    align-self:flex-end;
+    color:var(--web);
+    border-bottom-right-radius:3px;
+  }
+
+  .chat-footer{
+    padding:12px;
+    background:var(--panel);
+    border-top:1px solid var(--line-soft);
+    display:flex;
+    gap:8px;
+    align-items:center;
+  }
+
+  .chat-input{
+    flex:1;
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    padding:10px 14px;
+    border-radius:10px;
+    color:var(--text);
+    font-size:13px;
+    outline:none;
+    transition:.2s;
+  }
+
+  .chat-input:focus{
+    border-color:var(--web);
+  }
+
+  .chat-btn{
+    background:var(--web);
+    color:#080B10;
+    border:none;
+    width:38px; height:38px;
+    border-radius:10px;
+    font-weight:700;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:.2s;
+    flex-shrink:0;
+  }
+
+  .chat-btn:hover{
+    opacity:0.9;
+    transform:scale(1.05);
+  }
+
+  .mic-btn{
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    color:var(--text-dim);
+    width:38px; height:38px;
+    border-radius:10px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:.2s;
+    flex-shrink:0;
+  }
+
+  .mic-btn:hover{
+    border-color:var(--text);
+    color:var(--text);
+  }
+
+  .mic-btn.listening{
+    background:#E06666;
+    border-color:#E06666;
+    color:#fff;
+    animation: pulseMic 1.5s infinite;
+  }
+
+  @keyframes pulseMic {
+    0% { box-shadow: 0 0 0 0 rgba(224,102,102, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(224,102,102, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(224,102,102, 0); }
+  }
+
+  .footer-note{
+    grid-column: 1 / -1;
+    margin-top:4px;
+    padding-top:14px;
+    border-top:1px solid var(--line-soft);
+    font-size:11px;
+    color:var(--text-faint);
+    text-align:center;
+  }
+</style>
+</head>
+<body>
+
+  <div class="console">
+    <!-- Left Pane: Dashboard & Telemetry -->
+    <div class="left-pane">
+      <div class="head">
+        <div class="brand">
+          <div class="brand-name">Lumen Console AI</div>
+          <div class="brand-sub">ควบคุมและพูดคุยกับ AI อัจฉริยะผ่าน Firebase</div>
+        </div>
+        <div class="conn">
+          <span id="connDot" class="conn-dot"></span>
+          <span id="connText">กำลังเชื่อมต่อ…</span>
+        </div>
+      </div>
+
+      <!-- API Key input bar -->
+      <div class="api-bar">
+        <input type="password" id="apiKeyInput" placeholder="ใส่ Gemini API Key ของคุณที่นี่ (หรือปล่อยว่างเพื่อจำลองแชท)...">
+        <button class="api-btn" id="saveKeyBtn">บันทึก Key</button>
+      </div>
+
+      <div class="grid">
+        <div class="display">
+          <div class="dial">
+            <div id="dialRing" class="dial-ring"></div>
+            <div style="text-align:center;">
+              <div id="levelNum" class="level-num">–</div>
+              <div id="levelWord" class="level-word">ไม่มีข้อมูล</div>
+            </div>
+          </div>
+          <div class="bars" id="bars">
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+          </div>
+          <div class="driven-by" id="drivenBy">กำลังตรวจสอบสถานะ…</div>
+        </div>
+
+        <div class="col-controls">
+          <div>
+            <div class="section-label">ตั้งระดับความสว่างจากเว็บ</div>
+            <div class="levels" id="levels">
+              <button class="lvl-btn" data-level="0">ดับ</button>
+              <button class="lvl-btn" data-level="1">1</button>
+              <button class="lvl-btn" data-level="2">2</button>
+              <button class="lvl-btn" data-level="3">3</button>
+              <button class="lvl-btn" data-level="4">4</button>
+              <button class="lvl-btn" data-level="5">5</button>
+            </div>
+            <div class="hint" style="margin-top:8px;">กดปุ่มเพื่อสั่งงาน หรือใช้เสียง/แชทคุยกับ AI ด้านข้างได้เลย — หมุนตัวต้านทานไปที่ <b>ระดับ 5 สุด</b> เพื่อคุมผ่านบอร์ด</div>
+          </div>
+
+          <div>
+            <div class="section-label">ค่าจากตัวต้านทาน</div>
+            <div class="telemetry">
+              <div class="tele-item">
+                <div class="tele-label">ค่าดิบ (raw)</div>
+                <div class="tele-val" id="rawVal">–</div>
+              </div>
+              <div class="tele-item">
+                <div class="tele-label">ระดับที่คำนวณได้</div>
+                <div class="tele-val" id="potLevelVal">–</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Pane: AI Chat & Voice Control -->
+    <div class="right-pane">
+      <div class="chat-header">
+        <div class="chat-title">
+          <span></span> ผู้ช่วยลูเมน (AI Assistant)
+        </div>
+        <div style="font-size:11px; color:var(--text-dim);" id="aiStatus">พร้อมให้บริการ ✨</div>
+      </div>
+      <div class="chat-body" id="chatBody">
+        <div class="message ai">สวัสดีครับคุณเจ้าของ! ผมลูเมนเองครับ ยินดีช่วยดูแลความสว่างห้องให้สบายตา วันนี้อยากได้ไฟระดับไหนบอกผมได้เลยนะครับ หรือจะกดปุ่มไมค์พูดคุยกับผมก็ได้นะ! 😄</div>
+      </div>
+      <div class="chat-footer">
+        <input type="text" id="chatInput" class="chat-input" placeholder="พิมพ์คุยกับ AI หรือสั่งเปลี่ยนระดับไฟ...">
+        <button class="mic-btn" id="micBtn" title="สั่งการด้วยเสียง">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
+        </button>
+        <button class="chat-btn" id="sendChatBtn">➤</button>
+      </div>
+    </div>
+
+    <div class="footer-note">อัปเดตสถานะทุก 1 วินาที · รองรับการสั่งการผ่าน Gemini AI และ Web Speech API</div>
+  </div>
+
+<script>
+  const FIREBASE_HOST = "https://offon-b5a79-default-rtdb.firebaseio.com";
+  const FIREBASE_AUTH = "9tbcX6jbUjshB4xVIHlZyeqRLkPSQQj6NmZqc54b";
+  const POLL_MS = 1000;
+
+  const levelNum = document.getElementById('levelNum');
+  const levelWord = document.getElementById('levelWord');
+  const dialRing = document.getElementById('dialRing');
+  const bars = document.querySelectorAll('.bar');
+  const drivenBy = document.getElementById('drivenBy');
+  const rawVal = document.getElementById('rawVal');
+  const potLevelVal = document.getElementById('potLevelVal');
+  const connDot = document.getElementById('connDot');
+  const connText = document.getElementById('connText');
+  const levelBtns = document.querySelectorAll('.lvl-btn');
+
+  // AI & Chat elements
+  const apiKeyInput = document.getElementById('apiKeyInput');
+  const saveKeyBtn = document.getElementById('saveKeyBtn');
+  const chatBody = document.getElementById('chatBody');
+  const chatInput = document.getElementById('chatInput');
+  const sendChatBtn = document.getElementById('sendChatBtn');
+  const micBtn = document.getElementById('micBtn');
+  const aiStatus = document.getElementById('aiStatus');
+
+  const LEVEL_WORDS = ["ดับ","ระดับ 1","ระดับ 2","ระดับ 3","ระดับ 4","ระดับ 5 (สูงสุด)"];
+
+  let pendingOptimisticLevel = null;
+  let pendingUntil = 0;
+  let userApiKey = localStorage.getItem('gemini_api_key') || '';
+  if(userApiKey) apiKeyInput.value = userApiKey;
+
+  saveKeyBtn.addEventListener('click', () => {
+    userApiKey = apiKeyInput.value.trim();
+    localStorage.setItem('gemini_api_key', userApiKey);
+    appendMessage("AI บันทึก API Key เรียบร้อยแล้วครับ พร้อมลุยเต็มที่! 💡", 'ai');
+  });
+
+  function render(data){
+    const level = clamp(data.led_command ?? 0, 0, 5);
+    const raw = data.potentiometer ?? '–';
+    const potLevel = data.pot_level ?? '–';
+
+    const accent = 'var(--web)';
+
+    levelNum.textContent = level === 0 ? 'OFF' : level;
+    levelWord.textContent = LEVEL_WORDS[level];
+
+    dialRing.style.setProperty('--pct', (level/5*100));
+    dialRing.style.setProperty('--ring-color', level === 0 ? 'var(--off)' : accent);
+
+    bars.forEach((bar, i) => {
+      if (i < level){
+        bar.classList.add('lit');
+        bar.style.setProperty('--bar-color', accent);
+      } else {
+        bar.classList.remove('lit');
+      }
+    });
+
+    drivenBy.innerHTML = level === 0 ? 'สถานะ: <b>ไฟดับ</b>' : 'สถานะ: <b>สว่างระดับ ' + level + '</b>';
+
+    rawVal.textContent = raw;
+    potLevelVal.textContent = potLevel;
+
+    if (pendingOptimisticLevel !== null && (level === pendingOptimisticLevel || Date.now() > pendingUntil)){
+      pendingOptimisticLevel = null;
+    }
+    const highlightLevel = pendingOptimisticLevel !== null ? pendingOptimisticLevel : level;
+    levelBtns.forEach(btn => {
+      btn.classList.toggle('selected', parseInt(btn.dataset.level) === highlightLevel);
+    });
+  }
+
+  function clamp(v, min, max){ return Math.min(max, Math.max(min, v)); }
+
+  async function poll(){
+    try{
+      const res = await fetch(`${FIREBASE_HOST}/devices.json?auth=${FIREBASE_AUTH}`, {cache:'no-store'});
+      if(!res.ok) throw new Error('bad response');
+      const data = await res.json();
+      render(data || {});
+      connDot.className = 'conn-dot online';
+      connText.textContent = 'เชื่อมต่ออยู่';
+    } catch(err){
+      connDot.className = 'conn-dot offline';
+      connText.textContent = 'ขาดการเชื่อมต่อ';
+    }
+  }
+
+  async function setLevel(level){
+    pendingOptimisticLevel = level;
+    pendingUntil = Date.now() + 4000;
+    levelBtns.forEach(btn => {
+      btn.classList.toggle('selected', parseInt(btn.dataset.level) === level);
+    });
+    drivenBy.innerHTML = 'กำลังส่งคำสั่ง…';
+
+    try{
+      await fetch(`${FIREBASE_HOST}/devices/control_mode.json?auth=${FIREBASE_AUTH}`, {
+        method:'PUT', body: JSON.stringify('web')
+      });
+      await fetch(`${FIREBASE_HOST}/devices/led_command.json?auth=${FIREBASE_AUTH}`, {
+        method:'PUT', body: JSON.stringify(level)
+      });
+    } catch(err){
+      console.error('ส่งคำสั่งไม่สำเร็จ', err);
+    }
+    poll();
+  }
+
+  levelBtns.forEach(btn => {
+    btn.addEventListener('click', () => setLevel(parseInt(btn.dataset.level)));
+  });
+
+  // ---- AI Chat & Gemini API Logic ----
+  function appendMessage(text, sender){
+    const div = document.createElement('div');
+    div.className = `message ${sender}`;
+    div.textContent = text;
+    chatBody.appendChild(div);
+    chatBody.scrollTop = chatBody.scrollHeight;
+  }
+
+  async function handleUserMessage(text){
+    if(!text.trim()) return;
+    appendMessage(text, 'user');
+    chatInput.value = '';
+    aiStatus.textContent = 'AI กำลังคิด… 🤔';
+
+    try {
+      let replyText = "";
+      let targetLevel = null;
+
+      if(userApiKey){
+        // ใช้ Gemini API จริงตามที่ผู้ใช้ใส่ Key
+        const systemPrompt = `คุณคือ "ลูเมน" ผู้ช่วยควบคุมไฟอัจฉริยะ นิสัยเรียบง่าย สุภาพ ขี้เล่นนิดๆ และมีความกระตือรือร้นที่จะช่วยเหลือผู้ใช้อย่างเต็มที่ ผู้ใช้สามารถสั่งเปลี่ยนระดับไฟ LED (0 ถึง 5 โดย 0 คือดับ และ 5 คือสว่างสุด) หรือพูดคุยทั่วไปได้ หากผู้ใช้ต้องการเปลี่ยนความสว่าง ให้คุณวิเคราะห์ระดับที่เหมาะสม (0-5) และตอบกลับมาในรูปแบบ JSON ดังนี้: {"reply": "ข้อความตอบกลับของคุณ", "level": ตัวเลข0ถึง5}. หากไม่ได้ต้องการเปลี่ยนไฟ ให้กำหนด level เป็น null. ห้ามตอบนอกเหนือจาก JSON นี้`;
+        
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${userApiKey}`;
+        const payload = {
+          contents: [{ parts: [{ text }] }],
+          systemInstruction: { parts: [{ text: systemPrompt }] },
+          generationConfig: { responseMimeType: "application/json" }
+        };
+
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+        const candidate = result.candidates?.[0];
+        if(candidate && candidate.content?.parts?.[0]?.text){
+          const parsed = JSON.parse(candidate.content.parts[0].text);
+          replyText = parsed.reply;
+          if(parsed.level !== null && parsed.level !== undefined){
+            targetLevel = parseInt(parsed.level);
+          }
+        } else {
+          replyText = "อุ๊ย ขออภัยครับ ระบบ AI ขัดข้องชั่วารคราว ลองใหม่อีกทีนะครับ!";
+        }
+      } else {
+        // Fallback จำลอง AI อัจฉริยะกรณีไม่ได้ใส่ API Key เพื่อให้ใช้งานได้ทันที
+        const lower = text.toLowerCase();
+        if(lower.includes('มืด') || lower.includes('เปิด') || lower.includes('สว่าง') || lower.includes('ไฟ')) {
+          if(lower.includes('สุด') || lower.includes('5')) { targetLevel = 5; replyText = "จัดไปเลยครับคุณเจ้าของ เปิดไฟสว่างสุดระดับ 5 ให้สว่างจ้าท้าโลกเลยครับ! ☀️"; }
+          else if(lower.includes('ดับ') || lower.includes('ปิด')) { targetLevel = 0; replyText = "รับทราบครับ ปิดไฟมืดสนิทพร้อมนอนพักผ่อนแล้วครับ 🌙"; }
+          else { targetLevel = 3; replyText = "ห้องมืดไปหน่อยเหรอครับ งั้นผมจัดไฟระดับ 3 ให้กำลังดี สบายตาแน่นอนครับ! ✨"; }
+        } else if(lower.includes('ระดับ 0') || lower.includes('เบอร์ 0')) { targetLevel = 0; replyText = "จัดให้ครับ ปิดไฟเรียบร้อย!"; }
+        else if(lower.includes('ระดับ 1') || lower.includes('เบอร์ 1')) { targetLevel = 1; replyText = "ปรับเป็นระดับ 1 แสงอ่อนๆ ผ่อนคลายครับ"; }
+        else if(lower.includes('ระดับ 2') || lower.includes('เบอร์ 2')) { targetLevel = 2; replyText = "ปรับเป็นระดับ 2 เรียบร้อยครับ!"; }
+        else if(lower.includes('ระดับ 3') || lower.includes('เบอร์ 3')) { targetLevel = 3; replyText = "ปรับเป็นระดับ 3 กำลังดีเลยครับ"; }
+        else if(lower.includes('ระดับ 4') || lower.includes('เบอร์ 4')) { targetLevel = 4; replyText = "ปรับเป็นระดับ 4 สว่างสดใสครับ!"; }
+        else if(lower.includes('ระดับ 5') || lower.includes('เบอร์ 5')) { targetLevel = 5; replyText = "จัดเต็มระดับ 5 สว่างสะใจไปเลยครับ!"; }
+        else {
+          replyText = `แหม คุณพูดว่า "${text}" น่าสนใจจังครับ! ถ้าอยากให้ผมช่วยปรับระดับไฟห้องบอกได้เลยนะ หรือลองพูดว่า "มืดจัง" ดูสิครับ ผมพร้อมบริการเสมอ! 😄`;
+        }
+      }
+
+      appendMessage(replyText, 'ai');
+      if(targetLevel !== null && targetLevel >= 0 && targetLevel <= 5){
+        await setLevel(targetLevel);
+      }
+
+    } catch(err){
+      console.error(err);
+      appendMessage("แย่จัง เกิดข้อผิดพลาดในการเชื่อมต่อกับ AI ครับ ลองตรวจสอบ API Key หรือลองใหม่อีกครั้งนะครับ 😅", 'ai');
+    } finally {
+      aiStatus.textContent = 'พร้อมให้บริการ ✨';
+    }
+  }
+
+  sendChatBtn.addEventListener('click', () => handleUserMessage(chatInput.value));
+  chatInput.addEventListener('keypress', (e) => {
+    if(e.key === 'Enter') handleUserMessage(chatInput.value);
+  });
+
+  // ---- Web Speech API (Voice Recognition) ----
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(SpeechRecognition){
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'th-TH';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    micBtn.addEventListener('click', () => {
+      if(micBtn.classList.contains('listening')){
+        recognition.stop();
+        return;
+      }
+      try {
+        recognition.start();
+      } catch(e){
+        console.error(e);
+      }
+    });
+
+    recognition.onstart = () => {
+      micBtn.classList.add('listening');
+      aiStatus.textContent = 'กำลังฟังเสียงพูด... 🎙️';
+    };
+
+    recognition.onresult = (event) => {
+      const speechToText = event.results[0][0].transcript;
+      handleUserMessage(speechToText);
+    };
+
+    recognition.onerror = (event) => {
+      console.error('Speech recognition error', event.error);
+      aiStatus.textContent = 'พร้อมให้บริการ ✨';
+      micBtn.classList.remove('listening');
+    };
+
+    recognition.onend = () => {
+      micBtn.classList.remove('listening');
+      aiStatus.textContent = 'พร้อมให้บริการ ✨';
+    };
+  } else {
+    micBtn.title = "เบราว์เซอร์นี้ไม่รองรับการสั่งการด้วยเสียง";
+    micBtn.style.opacity = '0.5';
+  }
+
+  poll();
+  setInterval(poll, POLL_MS);
+</script>
+
+</body>
+</html>
