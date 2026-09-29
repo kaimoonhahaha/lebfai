@@ -1,30 +1,30 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lumen Console with Gemini AI</title>
+<meta charset="UTF-8"> <!-- กำหนดชุดตัวอักษรเป็น UTF-8 เพื่อรองรับภาษาไทย -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- ตั้งค่าให้รองรับการแสดงผลบนมือถือและ Responsive -->
+<title>Lumen Console with Gemini AI</title> <!-- ชื่อหัวข้อหน้าเว็บ -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"> <!-- โหลดฟอนต์จาก Google Fonts -->
 <style>
   :root{
-    --bg:#080B10;
-    --panel:#0F151C;
-    --panel-2:#141C25;
-    --line:#212B36;
-    --line-soft:#1A222C;
-    --text:#E7ECF1;
-    --text-dim:#7C8898;
-    --text-faint:#4C5764;
-    --web:#57E8C4;
-    --web-dim:#1E4B41;
-    --pot:#F5A94D;
-    --pot-dim:#4D3A1E;
-    --off:#3A4552;
+    --bg:#080B10;      /* สีพื้นหลังหลักของเว็บ */
+    --panel:#0F151C;   /* สีพื้นหลังของกล่องคอนโซลหลัก */
+    --panel-2:#141C25; /* สีพื้นหลังส่วนย่อยและปุ่มต่างๆ */
+    --line:#212B36;    /* สีเส้นขอบ */
+    --line-soft:#1A222C; /* สีเส้นขอบแบบจาง */
+    --text:#E7ECF1;    /* สีตัวหนังสือหลัก */
+    --text-dim:#7C8898; /* สีตัวหนังสือแบบรอง (จางลง) */
+    --text-faint:#4C5764; /* สีตัวหนังสือแบบจางมาก */
+    --web:#57E8C4;     /* สีเขียวมิ้นต์ (สำหรับโหมดเว็บ) */
+    --web-dim:#1E4B41; /* สีเขียวมิ้นต์แบบจาง */
+    --pot:#F5A94D;     /* สีส้ม (สำหรับ Potentiometer) */
+    --pot-dim:#4D3A1E; /* สีส้มแบบจาง */
+    --off:#3A4552;     /* สีเทาตอนสถานะปิด/ดับ */
   }
 
-  *{box-sizing:border-box; margin:0; padding:0;}
+  *{box-sizing:border-box; margin:0; padding:0;} /* รีเซ็ตค่าเริ่มต้นของ Margin, Padding และ Box-sizing ทุกตัว */
 
   html,body{
     height:100%;
@@ -69,12 +69,12 @@
     padding:26px;
     box-shadow:0 40px 90px -30px rgba(0,0,0,0.8);
     display:grid;
-    grid-template-columns: 1fr 380px;
+    grid-template-columns: 1fr 380px; /* แบ่งหน้าจอเป็น 2 คอลัมน์ (แดชบอร์ด และ แชท AI) */
     gap:28px;
   }
 
   @media (max-width:900px){
-    .console{grid-template-columns:1fr;}
+    .console{grid-template-columns:1fr;} /* ถ้าหน้าจอเล็กกว่า 900px ให้แสดงผลเป็นคอลัมน์เดียว */
   }
 
   .console::before{
@@ -99,7 +99,7 @@
     overflow:hidden;
   }
 
-  /* ---- header ---- */
+  /* ---- ส่วนหัว (Header) ---- */
   .head{
     display:flex;
     align-items:center;
@@ -152,7 +152,7 @@
     box-shadow:0 0 10px 1px rgba(224,102,102,0.5);
   }
 
-  /* ---- api key bar ---- */
+  /* ---- แถบใส่ Gemini API Key ---- */
   .api-bar{
     display:flex;
     gap:8px;
@@ -192,7 +192,7 @@
     background:rgba(87,232,196,0.25);
   }
 
-  /* ---- main grid section ---- */
+  /* ---- ส่วนแสดงผลหลัก (Grid) ---- */
   .grid{
     display:grid;
     grid-template-columns:190px 1fr;
@@ -204,7 +204,7 @@
     .grid{grid-template-columns:1fr; justify-items:center;}
   }
 
-  /* ---- level display ---- */
+  /* ---- วงกลมแสดงระดับไฟ (Dial & Level) ---- */
   .display{
     display:flex;
     flex-direction:column;
@@ -294,7 +294,7 @@
     font-weight:600;
   }
 
-  /* ---- right column controls ---- */
+  /* ---- ส่วนควบคุมฝั่งขวา (ปุ่มปรับระดับ & ค่า Telemetry) ---- */
   .col-controls{
     display:flex;
     flex-direction:column;
@@ -373,7 +373,7 @@
     font-weight:600;
   }
 
-  /* ---- AI Chat Pane ---- */
+  /* ---- ส่วน AI Chat Pane (แชทบ็อกซ์ด้านขวา) ---- */
   .chat-header{
     padding:14px 16px;
     background:rgba(255,255,255,0.02);
@@ -524,20 +524,20 @@
 <body>
 
   <div class="console">
-    <!-- Left Pane: Dashboard & Telemetry -->
+    <!-- แดชบอร์ดฝั่งซ้าย: แสดงสถานะไฟและค่า Telemetry -->
     <div class="left-pane">
       <div class="head">
         <div class="brand">
-          <div class="brand-name">Lumen Console AI</div>
+          <div class="brand-name">Lumen Console AI</div> <!-- ชื่อแอปพลิเคชัน -->
           <div class="brand-sub">ควบคุมและพูดคุยกับ AI อัจฉริยะผ่าน Firebase</div>
         </div>
         <div class="conn">
-          <span id="connDot" class="conn-dot"></span>
+          <span id="connDot" class="conn-dot"></span> <!-- จุดแสดงสถานะการเชื่อมต่อ -->
           <span id="connText">กำลังเชื่อมต่อ…</span>
         </div>
       </div>
 
-      <!-- API Key input bar -->
+      <!-- แถบกรอกและบันทึก Gemini API Key -->
       <div class="api-bar">
         <input type="password" id="apiKeyInput" placeholder="ใส่ Gemini API Key ของคุณที่นี่ (หรือปล่อยว่างเพื่อจำลองแชท)...">
         <button class="api-btn" id="saveKeyBtn">บันทึก Key</button>
@@ -546,9 +546,9 @@
       <div class="grid">
         <div class="display">
           <div class="dial">
-            <div id="dialRing" class="dial-ring"></div>
+            <div id="dialRing" class="dial-ring"></div> <!-- วงแหวนเรืองแสงรอบปุ่มหมุนแสดงระดับ -->
             <div style="text-align:center;">
-              <div id="levelNum" class="level-num">–</div>
+              <div id="levelNum" class="level-num">–</div> <!-- ตัวเลขบอกระดับไฟปัจจุบัน -->
               <div id="levelWord" class="level-word">ไม่มีข้อมูล</div>
             </div>
           </div>
@@ -566,12 +566,12 @@
           <div>
             <div class="section-label">ตั้งระดับความสว่างจากเว็บ</div>
             <div class="levels" id="levels">
-              <button class="lvl-btn" data-level="0">ดับ</button>
-              <button class="lvl-btn" data-level="1">1</button>
-              <button class="lvl-btn" data-level="2">2</button>
-              <button class="lvl-btn" data-level="3">3</button>
-              <button class="lvl-btn" data-level="4">4</button>
-              <button class="lvl-btn" data-level="5">5</button>
+              <button class="lvl-btn" data-level="0">ดับ</button> <!-- ปุ่มปรับระดับ 0 (ดับ) -->
+              <button class="lvl-btn" data-level="1">1</button> <!-- ปุ่มปรับระดับ 1 -->
+              <button class="lvl-btn" data-level="2">2</button> <!-- ปุ่มปรับระดับ 2 -->
+              <button class="lvl-btn" data-level="3">3</button> <!-- ปุ่มปรับระดับ 3 -->
+              <button class="lvl-btn" data-level="4">4</button> <!-- ปุ่มปรับระดับ 4 -->
+              <button class="lvl-btn" data-level="5">5</button> <!-- ปุ่มปรับระดับ 5 -->
             </div>
             <div class="hint" style="margin-top:8px;">กดปุ่มเพื่อสั่งงาน หรือใช้เสียง/แชทคุยกับ AI ด้านข้างได้เลย — หมุนตัวต้านทานไปที่ <b>ระดับ 5 สุด</b> เพื่อคุมผ่านบอร์ด</div>
           </div>
@@ -581,11 +581,11 @@
             <div class="telemetry">
               <div class="tele-item">
                 <div class="tele-label">ค่าดิบ (raw)</div>
-                <div class="tele-val" id="rawVal">–</div>
+                <div class="tele-val" id="rawVal">–</div> <!-- แสดงค่าดิบ Potentiometer จาก Firebase -->
               </div>
               <div class="tele-item">
                 <div class="tele-label">ระดับที่คำนวณได้</div>
-                <div class="tele-val" id="potLevelVal">–</div>
+                <div class="tele-val" id="potLevelVal">–</div> <!-- แสดงระดับ Potentiometer ที่แปลงแล้ว -->
               </div>
             </div>
           </div>
@@ -593,7 +593,7 @@
       </div>
     </div>
 
-    <!-- Right Pane: AI Chat & Voice Control -->
+    <!-- ส่วนแชท AI และควบคุมด้วยเสียงฝั่งขวา -->
     <div class="right-pane">
       <div class="chat-header">
         <div class="chat-title">
@@ -609,7 +609,7 @@
         <button class="mic-btn" id="micBtn" title="สั่งการด้วยเสียง">
           <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
         </button>
-        <button class="chat-btn" id="sendChatBtn">➤</button>
+        <button class="chat-btn" id="sendChatBtn">➤</button> <!-- ปุ่มกดส่งข้อความแชท -->
       </div>
     </div>
 
@@ -617,10 +617,11 @@
   </div>
 
 <script>
-  const FIREBASE_HOST = "https://offon-b5a79-default-rtdb.firebaseio.com";
-  const FIREBASE_AUTH = "9tbcX6jbUjshB4xVIHlZyeqRLkPSQQj6NmZqc54b";
-  const POLL_MS = 1000;
+  const FIREBASE_HOST = "https://offon-b5a79-default-rtdb.firebaseio.com"; // URL Firebase Realtime Database
+  const FIREBASE_AUTH = "9tbcX6jbUjshB4xVIHlZyeqRLkPSQQj6NmZqc54b"; // Secret Key สำหรับยืนยันตัวตนเชื่อมต่อ Firebase
+  const POLL_MS = 1000; // กำหนดความเร็วในการดึงข้อมูล (Polling) ทุกๆ 1 วินาที
 
+  // เชื่อมโยงตัวแปร JavaScript กับ Element ต่างๆ ใน HTML DOM
   const levelNum = document.getElementById('levelNum');
   const levelWord = document.getElementById('levelWord');
   const dialRing = document.getElementById('dialRing');
@@ -632,7 +633,7 @@
   const connText = document.getElementById('connText');
   const levelBtns = document.querySelectorAll('.lvl-btn');
 
-  // AI & Chat elements
+  // ตัวแปรส่วนจัดการ AI และแชท
   const apiKeyInput = document.getElementById('apiKeyInput');
   const saveKeyBtn = document.getElementById('saveKeyBtn');
   const chatBody = document.getElementById('chatBody');
@@ -641,19 +642,21 @@
   const micBtn = document.getElementById('micBtn');
   const aiStatus = document.getElementById('aiStatus');
 
-  const LEVEL_WORDS = ["ดับ","ระดับ 1","ระดับ 2","ระดับ 3","ระดับ 4","ระดับ 5 (สูงสุด)"];
+  const LEVEL_WORDS = ["ดับ","ระดับ 1","ระดับ 2","ระดับ 3","ระดับ 4","ระดับ 5 (สูงสุด)"]; // คำอธิบายระดับความสว่าง
 
   let pendingOptimisticLevel = null;
   let pendingUntil = 0;
-  let userApiKey = localStorage.getItem('gemini_api_key') || '';
+  let userApiKey = localStorage.getItem('gemini_api_key') || ''; // ดึง API Key ที่เคยบันทึกไว้ในเบราว์เซอร์
   if(userApiKey) apiKeyInput.value = userApiKey;
 
+  // บันทึก Gemini API Key ลงใน LocalStorage ของเบราว์เซอร์
   saveKeyBtn.addEventListener('click', () => {
     userApiKey = apiKeyInput.value.trim();
     localStorage.setItem('gemini_api_key', userApiKey);
     appendMessage("AI บันทึก API Key เรียบร้อยแล้วครับ พร้อมลุยเต็มที่! 💡", 'ai');
   });
 
+  // ฟังก์ชันแสดงผลข้อมูล (Render) อัปเดตหน้าจอตามข้อมูลที่ดึงมาจาก Firebase
   function render(data){
     const level = clamp(data.led_command ?? 0, 0, 5);
     const raw = data.potentiometer ?? '–';
@@ -690,8 +693,9 @@
     });
   }
 
-  function clamp(v, min, max){ return Math.min(max, Math.max(min, v)); }
+  function clamp(v, min, max){ return Math.min(max, Math.max(min, v)); } // ฟังก์ชันจำกัดค่าให้อยู่ในช่วงที่กำหนด
 
+  // ฟังก์ชันดึงข้อมูล (Polling) จาก Firebase Realtime Database มาแสดงผล
   async function poll(){
     try{
       const res = await fetch(`${FIREBASE_HOST}/devices.json?auth=${FIREBASE_AUTH}`, {cache:'no-store'});
@@ -706,6 +710,10 @@
     }
   }
 
+  // ==========================================
+  // [ส่วนสำคัญ] ฟังก์ชันส่งคำสั่งควบคุมไฟไปยัง Firebase
+  // เพื่อให้ฮาร์ดแวร์ภายนอก (เช่น ESP32) ดึงค่าไปปรับหลอดไฟจริง
+  // ==========================================
   async function setLevel(level){
     pendingOptimisticLevel = level;
     pendingUntil = Date.now() + 4000;
@@ -715,9 +723,11 @@
     drivenBy.innerHTML = 'กำลังส่งคำสั่ง…';
 
     try{
+      // 1. ส่งโหมดควบคุมกลับมาเป็น "web" เพื่อบอกบอร์ดว่ากำลังถูกสั่งจากหน้าเว็บ
       await fetch(`${FIREBASE_HOST}/devices/control_mode.json?auth=${FIREBASE_AUTH}`, {
         method:'PUT', body: JSON.stringify('web')
       });
+      // 2. ส่งค่าระดับคำสั่ง LED (0-5) ไปบันทึกลง Firebase
       await fetch(`${FIREBASE_HOST}/devices/led_command.json?auth=${FIREBASE_AUTH}`, {
         method:'PUT', body: JSON.stringify(level)
       });
@@ -727,11 +737,12 @@
     poll();
   }
 
+  // ดักเหตุการณ์คลิกปุ่มเลือกความสว่างบนหน้าเว็บ
   levelBtns.forEach(btn => {
     btn.addEventListener('click', () => setLevel(parseInt(btn.dataset.level)));
   });
 
-  // ---- AI Chat & Gemini API Logic ----
+  // ---- ส่วนจัดการ AI Chat และการเชื่อมต่อ Gemini API ----
   function appendMessage(text, sender){
     const div = document.createElement('div');
     div.className = `message ${sender}`;
@@ -740,6 +751,7 @@
     chatBody.scrollTop = chatBody.scrollHeight;
   }
 
+  // ฟังก์ชันประมวลผลข้อความแชทที่ผู้ใช้ส่งให้ AI
   async function handleUserMessage(text){
     if(!text.trim()) return;
     appendMessage(text, 'user');
@@ -751,10 +763,10 @@
       let targetLevel = null;
 
       if(userApiKey){
-        // ใช้ Gemini API จริงตามที่ผู้ใช้ใส่ Key
+        // ใช้ Gemini API จริงตาม Key ที่ผู้ใช้กรอก
         const systemPrompt = `คุณคือ "ลูเมน" ผู้ช่วยควบคุมไฟอัจฉริยะ นิสัยเรียบง่าย สุภาพ ขี้เล่นนิดๆ และมีความกระตือรือร้นที่จะช่วยเหลือผู้ใช้อย่างเต็มที่ ผู้ใช้สามารถสั่งเปลี่ยนระดับไฟ LED (0 ถึง 5 โดย 0 คือดับ และ 5 คือสว่างสุด) หรือพูดคุยทั่วไปได้ หากผู้ใช้ต้องการเปลี่ยนความสว่าง ให้คุณวิเคราะห์ระดับที่เหมาะสม (0-5) และตอบกลับมาในรูปแบบ JSON ดังนี้: {"reply": "ข้อความตอบกลับของคุณ", "level": ตัวเลข0ถึง5}. หากไม่ได้ต้องการเปลี่ยนไฟ ให้กำหนด level เป็น null. ห้ามตอบนอกเหนือจาก JSON นี้`;
         
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${userApiKey}`;
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${userApiKey}`; // เรียกใช้ Gemini Model API
         const payload = {
           contents: [{ parts: [{ text }] }],
           systemInstruction: { parts: [{ text: systemPrompt }] },
@@ -776,10 +788,10 @@
             targetLevel = parseInt(parsed.level);
           }
         } else {
-          replyText = "อุ๊ย ขออภัยครับ ระบบ AI ขัดข้องชั่วารคราว ลองใหม่อีกทีนะครับ!";
+          replyText = "อุ๊ย ขออภัยครับ ระบบ AI ขัดข้องชั่วคราว ลองใหม่อีกทีนะครับ!";
         }
       } else {
-        // Fallback จำลอง AI อัจฉริยะกรณีไม่ได้ใส่ API Key เพื่อให้ใช้งานได้ทันที
+        // กรณีไม่ได้ใส่ API Key จะใช้ระบบตอบกลับจำลอง (Fallback AI) เพื่อให้ทดสอบเล่นได้ทันที
         const lower = text.toLowerCase();
         if(lower.includes('มืด') || lower.includes('เปิด') || lower.includes('สว่าง') || lower.includes('ไฟ')) {
           if(lower.includes('สุด') || lower.includes('5')) { targetLevel = 5; replyText = "จัดไปเลยครับคุณเจ้าของ เปิดไฟสว่างสุดระดับ 5 ให้สว่างจ้าท้าโลกเลยครับ! ☀️"; }
@@ -797,6 +809,11 @@
       }
 
       appendMessage(replyText, 'ai');
+      
+      // ==========================================
+      // [ส่วนสำคัญ] หาก AI วิเคราะห์แล้วพบว่ามีคำสั่งเปลี่ยนระดับไฟ (targetLevel ไม่เป็น null)
+      // โค้ดจะเรียกฟังก์ชัน setLevel() เพื่อส่งค่าระดับไฟขึ้น Firebase ทันที
+      // ==========================================
       if(targetLevel !== null && targetLevel >= 0 && targetLevel <= 5){
         await setLevel(targetLevel);
       }
@@ -809,16 +826,17 @@
     }
   }
 
+  // ดักเหตุการณ์กดปุ่มส่งหรือกด Enter ในกล่องข้อความแชท
   sendChatBtn.addEventListener('click', () => handleUserMessage(chatInput.value));
   chatInput.addEventListener('keypress', (e) => {
     if(e.key === 'Enter') handleUserMessage(chatInput.value);
   });
 
-  // ---- Web Speech API (Voice Recognition) ----
+  // ---- ส่วนสั่งการด้วยเสียง (Web Speech API) ----
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if(SpeechRecognition){
     const recognition = new SpeechRecognition();
-    recognition.lang = 'th-TH';
+    recognition.lang = 'th-TH'; // ตั้งค่าภาษาเป็นภาษาไทย
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
 
@@ -828,7 +846,7 @@
         return;
       }
       try {
-        recognition.start();
+        recognition.start(); // เริ่มฟังเสียงพูด
       } catch(e){
         console.error(e);
       }
@@ -840,8 +858,8 @@
     };
 
     recognition.onresult = (event) => {
-      const speechToText = event.results[0][0].transcript;
-      handleUserMessage(speechToText);
+      const speechToText = event.results[0][0].transcript; // แปลงเสียงพูดเป็นข้อความ
+      handleUserMessage(speechToText); // ส่งข้อความที่แปลงได้ไปประมวลผลผ่านระบบ AI ต่อไป
     };
 
     recognition.onerror = (event) => {
@@ -859,8 +877,8 @@
     micBtn.style.opacity = '0.5';
   }
 
-  poll();
-  setInterval(poll, POLL_MS);
+  poll(); // เรียกใช้งานฟังก์ชันดึงข้อมูลรอบแรกทันทีเมื่อโหลดเว็บ
+  setInterval(poll, POLL_MS); // ตั้งเวลาดึงข้อมูลซ้ำอัตโนมัติทุกๆ 1 วินาทีเพื่อให้หน้าเว็บอัปเดตสถานะล่าสุดเสมอ
 </script>
 
 </body>
